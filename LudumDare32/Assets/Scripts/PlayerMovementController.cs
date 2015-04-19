@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class PlayerMovementController : MonoBehaviour
 {
@@ -13,6 +14,9 @@ public class PlayerMovementController : MonoBehaviour
 	public float fireRate = 0.5f;
 	private float nextFire = 0.0f;
 	private float resetTimer = 1f;
+
+	[SerializeField]
+	private int lifes = 5;
 	
 	void Start ()
 	{
@@ -21,6 +25,14 @@ public class PlayerMovementController : MonoBehaviour
 	
 	void FixedUpdate ()
 	{
+
+		if(GameObject.FindGameObjectsWithTag("Peasant").Length <= 0)
+		{
+			Application.LoadLevel("Win");
+		}
+
+		GameObject.FindGameObjectWithTag("LifesField").GetComponent<Text>().text = "" + lifes;
+
 		horizontalInput = Input.GetAxis ("Horizontal"); 
 		verticalInput = Input.GetAxis ("Vertical"); 
 
@@ -43,8 +55,6 @@ public class PlayerMovementController : MonoBehaviour
 			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 			float hitdist = 0.0f;
 
-
-
 			if (playerPlane.Raycast (ray, out hitdist)) {
 
 				float distance = Vector3.Distance(transform.position, ray.GetPoint (hitdist));
@@ -54,11 +64,22 @@ public class PlayerMovementController : MonoBehaviour
 					ProjectileMovementController pmc = go.transform.GetComponent<ProjectileMovementController> ();
 					pmc.setTarget (ray.GetPoint (hitdist));
 					resetTimer = 1;
-				}else{
-
 				}
 			}
 		}	
 
+		if(lifes<0)
+		{
+			Application.LoadLevel("Loose");
+		}
+
+	}
+
+	void OnCollisionEnter(Collision col)
+	{
+		if(col.gameObject.tag == "Peasant")
+		{
+			lifes--;
+		}
 	}
 }
